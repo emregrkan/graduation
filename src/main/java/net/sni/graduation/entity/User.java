@@ -1,6 +1,6 @@
 package net.sni.graduation.entity;
 
-import lombok.AccessLevel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,8 +24,15 @@ public class User implements UserDetails {
     private UUID id;
     @Column(unique = true)
     private String email;
-    private String username;
+    @JsonIgnore
     private String password;
+    @OneToOne(mappedBy = "user")
+    private Profile profile;
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
