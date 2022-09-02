@@ -9,6 +9,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQL81Dialect
     hibernate:
       ddl-auto: update
+    defer-datasource-initialization: true
   data:
     rest:
       base-path: /api/v1
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:sql-scripts/create-roles.sql
