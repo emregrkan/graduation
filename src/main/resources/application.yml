@@ -19,4 +19,4 @@ spring:
       data-locations: classpath:sql-scripts/create-roles.sql
 
 keystore:
-  passphrase: ${KEYSTORE_PASSPHRASE}
+  passphrase: ${KEYSTORE_PASSPHRASE:preheated fringe footbath unripe unruffled viability another series boggle deafness flashbulb clutter}
