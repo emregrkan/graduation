@@ -1,7 +1,7 @@
 package net.sni.graduation.event;
 
 import lombok.RequiredArgsConstructor;
-import net.sni.graduation.constant.RoleEnum;
+import net.sni.graduation.constant.AuthorityEnum;
 import net.sni.graduation.entity.User;
 import net.sni.graduation.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +18,10 @@ public class UserEventHandler {
     private final PasswordEncoder passwordEncoder;
 
     @HandleBeforeCreate
+    @SuppressWarnings("unused")
     public void hashUserPassword(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        roleRepository.findByRole(RoleEnum.USER).ifPresent(role -> user.getRoles().add(role));
+        roleRepository.findByAuthority(AuthorityEnum.USER)
+                .ifPresent(role -> user.getRoles().add(role));
     }
 }

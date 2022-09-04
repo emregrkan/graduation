@@ -17,3 +17,6 @@ spring:
     init:
       mode: always
       data-locations: classpath:sql-scripts/create-roles.sql
+
+keystore:
+  passphrase: ${KEYSTORE_PASSPHRASE}

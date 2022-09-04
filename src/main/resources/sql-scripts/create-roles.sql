@@ -1,2 +1,2 @@
-insert into public.tb_role (id, role) values (nextval('hibernate_sequence'), 'USER') on conflict do nothing;
-insert into public.tb_role (id, role) values (nextval('hibernate_sequence'), 'ADMIN') on conflict do nothing;
+insert into public.tb_role (id, authority) values (nextval('hibernate_sequence'), 'USER') on conflict do nothing;
+insert into public.tb_role (id, authority) values (nextval('hibernate_sequence'), 'ADMIN') on conflict do nothing;

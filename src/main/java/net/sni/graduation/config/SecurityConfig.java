@@ -1,6 +1,8 @@
 package net.sni.graduation.config;
 
 import lombok.RequiredArgsConstructor;
+import net.sni.graduation.security.AuthenticationFilter;
+import net.sni.graduation.security.JwtFilter;
 import net.sni.graduation.service.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +15,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,25 +29,26 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors().and().csrf()
-                .disable();
+    public SecurityFilterChain apiFilterChain(HttpSecurity http, JwtFilter jwtFilter, AuthenticationFilter authenticationFilter) throws Exception {
+
+        authenticationFilter.setFilterProcessesUrl("/api/v1/login");
 
         http
+                .cors().and().csrf()
+                    .disable()
+                .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .antMatcher("/api/v1/login")
+                    .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.POST).permitAll())
+                .antMatcher("/api/v1/refresh")
+                    .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.POST).permitAll())
                 .antMatcher("/api/v1/users")
-                .authorizeHttpRequests(
-                        authorize -> authorize
-                                .antMatchers(HttpMethod.POST).permitAll()
-                )
+                    .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.POST).permitAll())
                 .antMatcher("/api/**")
-                .authorizeHttpRequests(
-                        authorize -> authorize
-                                .anyRequest().authenticated()
-                ).httpBasic();
-//                .realmName("api")
-//                .and()
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                    .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+                .addFilter(authenticationFilter)
+                .addFilterBefore(jwtFilter, AuthenticationFilter.class);
 
         return http.build();
     }
