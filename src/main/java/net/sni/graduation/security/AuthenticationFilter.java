@@ -50,8 +50,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             String refreshToken = jwtUtil.generateToken(TokenEnum.REFRESH, userDetails, 30 * 60 * 1000);
 
             Map<String, String> tokens = new HashMap<>(2) {{
-                put("access_token", accessToken);
-                put("refresh_token", refreshToken);
+                put("accessToken", accessToken);
+                put("refreshToken", refreshToken);
             }};
 
             response.setContentType("application/json");

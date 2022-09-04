@@ -19,6 +19,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -31,7 +36,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http, JwtFilter jwtFilter, AuthenticationFilter authenticationFilter) throws Exception {
 
-        authenticationFilter.setFilterProcessesUrl("/api/v1/login");
+        authenticationFilter.setFilterProcessesUrl("/api/v1/auth/login");
 
         http
                 .cors().and().csrf()
@@ -54,8 +59,34 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:4200"));
+        corsConfiguration.setAllowedHeaders(List.of("*"));
+        corsConfiguration.setExposedHeaders(List.of("*"));
+        corsConfiguration.setAllowedMethods(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+        return new CorsFilter(source);
+    }
+
+    @Bean
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(authorize -> authorize.antMatchers("/webjars/**", "/static/**").permitAll().antMatchers("/admin/**").hasRole("ADMIN").antMatchers("/login*").permitAll().anyRequest().authenticated()).formLogin().loginPage("/login").and().logout().deleteCookies().permitAll();
+        http
+                .authorizeHttpRequests(
+                        authorize -> authorize
+                                .antMatchers("/webjars/**", "/static/**").permitAll()
+                                .antMatchers("/admin/**").hasRole("ADMIN")
+                                .antMatchers("/login*").permitAll()
+                                .anyRequest().authenticated()
+                )
+                .formLogin().loginPage("/login")
+                .and()
+                .logout()
+                .deleteCookies()
+                .permitAll();
 
         return http.build();
     }

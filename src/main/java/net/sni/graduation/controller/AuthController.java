@@ -36,7 +36,7 @@ public class AuthController {
         return "login";
     }
 
-    @RequestMapping(path = "/api/v1/refresh", method = RequestMethod.POST)
+    @RequestMapping(path = "/api/v1/auth/refresh", method = RequestMethod.POST)
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String authorizationHeader = request.getHeader("Authorization");
 
@@ -49,8 +49,8 @@ public class AuthController {
                 String accessToken = jwtUtil.generateToken(TokenEnum.ACCESS, userDetails, 10 * 60 * 1000);
 
                 Map<String, String> tokens = new HashMap<>(2) {{
-                    put("access_token", accessToken);
-                    put("refresh_token", refreshToken);
+                    put("accessToken", accessToken);
+                    put("refreshToken", refreshToken);
                 }};
 
                 response.setContentType("application/json");
