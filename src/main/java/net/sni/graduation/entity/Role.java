@@ -13,7 +13,6 @@ import java.util.Set;
 @Setter
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Enumerated(EnumType.STRING)
     @Column(unique = true)
