@@ -9,7 +9,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public interface JwtUtil {
-    String getUsernameFromToken(String token) throws Exception;
+    String getEmailFromToken(String token) throws Exception;
 
     List<AuthorityEnum> getAuthoritiesFromToken(String token) throws Exception;
 

@@ -48,8 +48,8 @@ public class AuthController {
         if (refreshTokenCookie.isPresent()) {
             try {
                 String refreshToken = refreshTokenCookie.get().getValue();
-                String username = jwtUtil.getUsernameFromToken(refreshToken);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                String email = jwtUtil.getEmailFromToken(refreshToken);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
                 String accessToken = jwtUtil.generateToken(TokenEnum.ACCESS, userDetails, 10 * 60 * 1000);
 

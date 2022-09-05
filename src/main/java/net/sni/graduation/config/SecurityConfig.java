@@ -44,14 +44,13 @@ public class SecurityConfig {
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .antMatcher("/api/v1/login")
-                    .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.POST).permitAll())
-                .antMatcher("/api/v1/refresh")
-                    .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.GET).permitAll())
-                .antMatcher("/api/v1/users")
-                    .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.POST).permitAll())
                 .antMatcher("/api/**")
-                    .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+                .authorizeHttpRequests(
+                    authorize -> authorize
+                        .antMatchers("/api/v1/auth/**").permitAll()
+                        .antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                        .anyRequest().authenticated()
+                )
                 .addFilter(authenticationFilter)
                 .addFilterBefore(jwtFilter, AuthenticationFilter.class);
 

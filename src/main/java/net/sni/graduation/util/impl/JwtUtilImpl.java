@@ -32,14 +32,14 @@ public class JwtUtilImpl implements JwtUtil {
     }
 
     @Override
-    public String getUsernameFromToken(String token) throws Exception {
+    public String getEmailFromToken(String token) throws Exception {
         Claims claims = getAllClaims(token);
 
         if (claims != null) {
             return claims.getSubject();
         }
 
-        throw new Exception("No claims found to get username");
+        throw new Exception("No claims found to get email");
     }
 
     @Override
@@ -109,7 +109,7 @@ public class JwtUtilImpl implements JwtUtil {
 
     @Override
     public Boolean validateToken(String token, UserDetails userDetails) throws Exception {
-        return userDetails.getUsername().equals(getUsernameFromToken(token)) && !isTokenExpired(token);
+        return userDetails.getUsername().equals(getEmailFromToken(token)) && !isTokenExpired(token);
     }
 
     private Boolean isTokenExpired(String token) throws Exception {
