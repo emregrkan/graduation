@@ -1,8 +1,8 @@
 package net.sni.graduation.config;
 
 import lombok.RequiredArgsConstructor;
-import net.sni.graduation.security.AuthenticationFilter;
-import net.sni.graduation.security.JwtFilter;
+import net.sni.graduation.filter.AuthenticationFilter;
+import net.sni.graduation.filter.JwtFilter;
 import net.sni.graduation.service.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .antMatcher("/api/v1/login")
                     .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.POST).permitAll())
                 .antMatcher("/api/v1/refresh")
-                    .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.POST).permitAll())
+                    .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.GET).permitAll())
                 .antMatcher("/api/v1/users")
                     .authorizeHttpRequests(authorize -> authorize.antMatchers(HttpMethod.POST).permitAll())
                 .antMatcher("/api/**")

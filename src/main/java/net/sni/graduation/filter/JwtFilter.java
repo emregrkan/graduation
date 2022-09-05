@@ -1,4 +1,4 @@
-package net.sni.graduation.security;
+package net.sni.graduation.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

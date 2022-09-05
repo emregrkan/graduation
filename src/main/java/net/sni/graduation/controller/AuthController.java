@@ -8,13 +8,18 @@ import net.sni.graduation.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @Slf4j
@@ -36,21 +41,20 @@ public class AuthController {
         return "login";
     }
 
-    @RequestMapping(path = "/api/v1/auth/refresh", method = RequestMethod.POST)
+    @RequestMapping(path = "/api/v1/auth/refresh", method = RequestMethod.GET)
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String authorizationHeader = request.getHeader("Authorization");
+        Optional<Cookie> refreshTokenCookie = Arrays.stream(request.getCookies()).filter(cookie -> cookie.getName().equals("refresh_token")).findAny();
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+        if (refreshTokenCookie.isPresent()) {
             try {
-                String refreshToken = authorizationHeader.substring(7);
+                String refreshToken = refreshTokenCookie.get().getValue();
                 String username = jwtUtil.getUsernameFromToken(refreshToken);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 String accessToken = jwtUtil.generateToken(TokenEnum.ACCESS, userDetails, 10 * 60 * 1000);
 
-                Map<String, String> tokens = new HashMap<>(2) {{
+                Map<String, String> tokens = new HashMap<>(1) {{
                     put("accessToken", accessToken);
-                    put("refreshToken", refreshToken);
                 }};
 
                 response.setContentType("application/json");

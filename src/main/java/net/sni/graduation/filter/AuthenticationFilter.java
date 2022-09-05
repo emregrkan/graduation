@@ -1,4 +1,4 @@
-package net.sni.graduation.security;
+package net.sni.graduation.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -49,9 +50,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             String accessToken = jwtUtil.generateToken(TokenEnum.ACCESS, userDetails, 10 * 60 * 1000);
             String refreshToken = jwtUtil.generateToken(TokenEnum.REFRESH, userDetails, 30 * 60 * 1000);
 
-            Map<String, String> tokens = new HashMap<>(2) {{
+            Cookie refreshTokenCookie = new Cookie("refresh_token", refreshToken);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(30 * 60 * 1000);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setHttpOnly(true);
+
+            response.addCookie(refreshTokenCookie);
+
+            Map<String, String> tokens = new HashMap<>(1) {{
                 put("accessToken", accessToken);
-                put("refreshToken", refreshToken);
             }};
 
             response.setContentType("application/json");
