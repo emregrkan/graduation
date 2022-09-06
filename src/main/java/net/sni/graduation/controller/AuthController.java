@@ -1,40 +1,26 @@
 package net.sni.graduation.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sni.graduation.constant.TokenEnum;
 import net.sni.graduation.service.UserDetailsService;
 import net.sni.graduation.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class AuthController {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-    private final ObjectMapper objectMapper;
-
-    @Autowired
-    public AuthController(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
-        this.objectMapper = new ObjectMapper();
-    }
 
     @GetMapping("/login")
     public String login() {
@@ -42,30 +28,44 @@ public class AuthController {
     }
 
     @RequestMapping(path = "/api/v1/auth/refresh", method = RequestMethod.GET)
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Optional<Cookie> refreshTokenCookie = Arrays.stream(request.getCookies()).filter(cookie -> cookie.getName().equals("refresh_token")).findAny();
-
-        if (refreshTokenCookie.isPresent()) {
+    public @ResponseBody Map<String, String> refreshToken(@Nullable @CookieValue("refresh_token") String refreshToken, HttpServletResponse response) {
+        if (refreshToken != null) {
             try {
-                String refreshToken = refreshTokenCookie.get().getValue();
                 String email = jwtUtil.getEmailFromToken(refreshToken);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
                 String accessToken = jwtUtil.generateToken(TokenEnum.ACCESS, userDetails, 10 * 60 * 1000);
 
-                Map<String, String> tokens = new HashMap<>(1) {{
-                    put("accessToken", accessToken);
-                }};
-
-                response.setContentType("application/json");
-                objectMapper.writeValue(response.getOutputStream(), tokens);
+                response.setStatus(200);
+                return Map.of("accessToken", accessToken);
             } catch (Exception e) {
                 log.error("Exception:", e);
-
                 response.setStatus(403);
-                response.setContentType("application/json");
-                objectMapper.writeValue(response.getOutputStream(), Map.of("error", e.getMessage()));
+                return Map.of("error", e.getMessage());
             }
         }
+
+        response.setStatus(401);
+        return Map.of("error", "No token provided");
+    }
+
+    @RequestMapping(path = "/api/v1/auth/me", method = RequestMethod.GET)
+    public @ResponseBody UserDetails getAuthenticatedUser(@Nullable @RequestHeader("Authorization") String authorizationHeader, HttpServletResponse response) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+
+            try {
+                String email = jwtUtil.getEmailFromToken(token);
+
+                response.setStatus(200);
+                return userDetailsService.loadUserByUsername(email);
+            } catch (Exception e) {
+                log.error("Exception:", e);
+                response.setStatus(403);
+                return null;
+            }
+        }
+
+        response.setStatus(401);
+        return null;
     }
 }

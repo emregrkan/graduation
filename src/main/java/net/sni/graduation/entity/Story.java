@@ -21,6 +21,9 @@ public class Story {
     private UUID id;
     @Lob
     @Type(type = "org.hibernate.type.TextType")
+    private String title;
+    @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String content;
     @OneToMany(mappedBy = "story")
     private Set<Character> characters;
